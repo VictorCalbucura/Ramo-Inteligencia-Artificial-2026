@@ -10,9 +10,9 @@ from tablero import tablero
 
 if __name__ == "__main__":
     # Humano vs Bot
-    #nombre = input("Ingresa tu nombre: ")
-    #j1 = jugador(nombre, False, 'B')
-    #j2   = jugador("BOT", True, 'N')
+    nombre = input("Ingresa tu nombre: ")
+    j1 = jugador(nombre, False, 'B')
+    j2   = jugador("BOT", True, 'N')
     
     # Humano vs Humano
     #nombre1 = input("Nombre del Jugador 1 (Blancas ○): ")
@@ -21,8 +21,8 @@ if __name__ == "__main__":
     #j2 = jugador(nombre2, False, 'N')
     
     # Bot vs Bot
-    j1 = jugador("BOT-Blancas", True, 'B')
-    j2 = jugador("BOT-Negras",  True, 'N')
+    #j1 = jugador("BtBlancas", True, 'B')
+    #j2 = jugador("BtNegras",  True, 'N')
 
     juego = tablero(j1, j2)
     juego.inicia_partida()
