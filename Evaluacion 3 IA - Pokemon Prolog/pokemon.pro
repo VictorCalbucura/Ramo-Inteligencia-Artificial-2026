@@ -145,6 +145,7 @@ pokemon(dragonair, dragon, nil).
 pokemon(dragonite, dragon, volador).
 pokemon(mewtwo, psiquico, nil).
 pokemon(mew, psiquico, nil).
+pokemon(swampert, agua, tierra).
 
 
 % Relaciones de efectividad entre tipos de pokemon
