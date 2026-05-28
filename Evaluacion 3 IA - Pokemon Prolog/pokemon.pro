@@ -172,7 +172,7 @@ efectivo(hada, lucha).
 efectivo(hada, siniestro).
 efectivo(hielo, planta).
 efectivo(hielo, dragon).
-efectivo(hielo, tierra)
+efectivo(hielo, tierra).
 efectivo(hielo, volador).
 efectivo(lucha, acero).
 efectivo(lucha, hielo).
@@ -277,18 +277,22 @@ ineficaz(volador, roca).
 % Un Pokémon A vencerá a un Pokémon B si, y solo si,
 % al menos uno de sus tipos es efectivo contra uno de los tipos de B,
 % y ningún tipo de A es ineficaz contra alguno de los tipos de B.
-% SIGLAS:
-% T: Tipo del Pokemon
 
-vence(A, B) :- 
-    pokemon(A, TA1, TA2), pokemon(B, TB1, TB2), % Existen 2 Pokemon
-    (efectivo(TA1, TB1); efectivo(TA1, TB2); efectivo(TA2, TB1); efectivo(TA2, TB2)), % Al menos un tipo de A debe ser efectivo contra B
-    \+ (ineficaz(TA1, TB1); ineficaz(TA1, TB2); ineficaz(TA2, TB1); ineficaz(TA2, TB2)), % Ningun tipo de A debe ser ineficaz contra B
-    format('~w vencio a ~w!~n', [A, B]), !. % Si esto se cumple, A vence a B
+%CODIGO 1%
 
-vence(A, B) :- % Función auxiliar, si no se cumple la regla 1, entonces B vence a A
-    pokemon(A, _, _), pokemon(B, _, _),
-    format('~w vencio a ~w!~n', [B, A]), fail. % Esto aplica si el pokemon ataca neutro, si no es efectivo, o si es mirror match, como squirtle vs squirtle, donde perdemos nosotros siempre (que injusta es la vida)
+tipo(POKEMON, TIPO) :-
+	pokemon(POKEMON, TIPO, _),
+	TIPO \= nil.
+
+tipo(POKEMON, TIPO) :-
+	pokemon(POKEMON, _, TIPO),
+	TIPO \= nil.
+
+vence_pokemon(PROPIO, RIVAL) :-
+	tipo(PROPIO, TIPO_PROPIO),
+	tipo(RIVAL, TIPO_RIVAL),
+	efectivo(TIPO_PROPIO, TIPO_RIVAL),
+	\+ (tipo(PROPIO, OTRO_TIPO_PROPIO), tipo(RIVAL, OTRO_TIPO_RIVAL), ineficaz(OTRO_TIPO_PROPIO, OTRO_TIPO_RIVAL)).
 
 % Un oponente es uno de los contrincantes del combate pokemon
 % El equipo de "Candela" está compuesto por "Flareon", "Magmar" y "Moltres"
@@ -301,24 +305,23 @@ oponente(gary, [venusaur, blastoise, charizard]).
 % Regla 2:
 % Para cada Pokémon de mi oponente,
 % al menos uno de mis Pokémon debe vencerlo.
-% SIGLAS:
-% E: Equipo en []
-% O: Oponente
-% R: Pokemon Rivales (Plural)
-% Pr: Pokemon Rival (Individual)
-% A: Pokemon Propio
 
-combatir(E, O) :- 
-    oponente(O, R), % Este es el oponente que queremos enfrentar
-    empezar(E, R). % Combate recursivo sin reutilizar pokémon
+% CODIGO 2
 
-empezar(_, []) :- % El combate empieza desde aquí, el escenario donde ganamos es que tenemos al menos un poke y no quedan rivales
-    write('Has ganado!'), nl, !. % Si es así, retorna verdadero
+vence_equipo(PROPIOS, RIVAL) :-
+	oponente(RIVAL, EQUIPO_RIVAL),
+	gana_a_todos(PROPIOS, EQUIPO_RIVAL).
 
-empezar(E, [Rival|Rivales]) :- % El combate está aquí, donde tenemos nuestro equipo y el rival actual (Rival entre Rivales)
-select(A, E, RE), % Se selecciona un pokemon A del equipo E (propio) y se elimina del Resto del equipo (Literalmente lo sacamos del equipo)
-    vence(A, Rival), % Se compara ese pokemon A contra el Rival a combatir
-    empezar(RE, Rivales). % Se llama a la función otra vez, hasta que, o no haya Resto Propio, o no hayan Rivales
+gana_a_todos(_, []).
 
-empezar(_, _) :- % Si es que llegamos hasta aquí, donde no tenemos equipo, independiente de si el rival tampoco tiene, perdimos
-    write('Has perdido...'), nl, fail. % Retorna false
+gana_a_todos(PROPIOS, [RIVAL_POKEMON|RESTO]) :-
+	member(PROPIO, PROPIOS),
+	vence_pokemon(PROPIO, RIVAL_POKEMON),
+	gana_a_todos(PROPIOS, RESTO).
+
+mostrar_resultado(PROPIOS, RIVAL) :-
+	(   vence_equipo(PROPIOS, RIVAL)
+	->  write('Jugador gana')
+	;   write('Jugador pierde')
+	),
+	nl.
